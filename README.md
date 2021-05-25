@@ -8,6 +8,37 @@ Práctica 2de la asignatura *"Tipología y ciclo de vida de los datos"* del [Má
 * Pablo Benito
 * Miquel Rived 
 
+
+# Descripción del dataset. 
+
+> ¿Por qué es importante y qué pregunta/problema pretende responder?
+
+# Integración y selección de los datos de interés a analizar.
+TBD
+# Limpieza de los datos
+## Elementos vacíos
+> ¿Los datos contienen ceros o elementos vacíos? ¿Cómo gestionarías cada uno de estos casos?
+TBD
+## Identificación y tratamiento de valores extremos
+TBD
+# Análisis de los datos
+## Selección de los grupos de datos que se quieren analizar/comparar (planificación de los análisis a aplicar)
+TBD
+## Comprobación de la normalidad y homogeneidad de la varianza
+TBD 
+
+## Aplicación de pruebas estadísticas para comparar los grupos de datos
+En función de los datos y el objetivo del estudio, aplicar pruebas de contraste de hipótesis, correlaciones, regresiones, etc. Aplicar al menos tres métodos de análisis diferentes.
+
+TBD
+# Representación de los resultados a partir de tablas y gráficas
+TBD
+
+# Resolución del problema.
+> A partir de los resultados obtenidos, ¿cuáles son las conclusiones? ¿Los resultados permiten responder al problema?
+
+TBD
+
 # Contexto
 Esta práctica se ha realizado bajo el contexto de la asignatura Tipología y ciclo de vida de los datos, perteneciente al Máster en Ciencia de Datos de la Universitat Oberta de Catalunya. En ella, se aplican técnicas de limpieza y análisis de datos mediante el lenguaje de programación R
 
