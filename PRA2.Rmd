@@ -57,9 +57,9 @@ Los atributos identificados, junto a su significado se resumen en la siguiente t
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE,result='asis'}
 description_df <- data.frame (
-                    #campo  = colnames(fifaData),
+                    #campo  = colnames(data),
                     tipo = sapply(data, class),
-                    description = c(
+                    descripción = c(
                       "Velocidad de obturación máxima .",
                       "Puntuación de review",
                       "Puntuación calidad de construcción",
@@ -187,7 +187,7 @@ description_df <- data.frame (
                       "Almacenamiento incluido") 
                   )
 
-kable(description_df,caption="Propiedades de las cámaras")
+kable(description_df,caption="**Propiedades de las cámaras**") %>% kable_styling()
 ```
 
 Asimismo vamos a realizar una inspección rápida de los atributos mediante el comando `summary`
@@ -199,7 +199,7 @@ summary(data)
 Veamos que aspecto tienen los datos mostrando las primeras filas:
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
-head(fifaData)
+head(data)
 ```
 
 # Comprobar atributos con valores vacíos
@@ -253,6 +253,5 @@ write.csv(data, 'dpreview_clean.csv', row.names = FALSE)
 # Referencias
 
 * Identificar y eliminar duplicados: [https://www.datanovia.com/en/lessons/identify-and-remove-duplicate-data-in-r/]
-* https://www.kaggle.com/karangadiya/fifa19
 * Tabla con medidas de tendencia central y dispersión: [https://cran.r-project.org/web/packages/qwraps2/vignettes/summary-statistics.html]
 * My favourite R package for: summarising data [https://dabblingwithdata.wordpress.com/2018/01/02/my-favourite-r-package-for-summarising-data/]
