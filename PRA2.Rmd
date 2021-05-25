@@ -1,0 +1,258 @@
+---
+title: 'Tipología y ciclo de vida de los datos: PRA2'
+author: "Autor: Pablo Benito y Miquel Rived"
+date: "Junio 2021"
+output:
+  html_document:
+    highlight: default
+    number_sections: yes
+    theme: cosmo
+    toc: yes
+    toc_depth: 2
+    includes:
+      in_header: PEC-header.html
+  pdf_document:
+    highlight: zenburn
+    toc: yes
+  word_document: default
+---
+
+******
+# Cargar el archivo
+
+<span style="color: red;">**RÚBRICA** Apartados 1,2,3 y 4: 30%.</span>
+
+> Se debe abrir el archivo de datos y examinar el tipo de datos con los que R ha interpretado cada variable. Examinar también los valores resumen de cada tipo de variable.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# Cargamos los paquetes R que vamos a usar
+library(ggplot2)
+library(dplyr)
+library(knitr)
+library(stringr)
+library(lubridate)
+library(purrr)
+library(RcmdrMisc)
+library(ggbiplot)
+library(summarytools)
+library(kableExtra)
+
+```
+
+En primer lugar cargamos el archivo utilizando la función `read.csv`. añadimos el parámetro `stringsAsFactors=False` para que no convierta en factores los atributos que detecte como `String`. Posteriormente, nosotros realizaremos esa conversión para aquellos campos que consideremos oportuno.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# Cargamos el fichero de datos
+data <- read.csv('dpreview.csv',stringsAsFactors = FALSE)
+```
+
+Verificamos el tipo de datos asignado por R a cada atributo utilizando el comando `str` (`structure`):
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# Verificamos la estructura del conjunto de datos
+str(data)
+```
+
+Los atributos identificados, junto a su significado se resumen en la siguiente tabla:
+
+```{r echo=TRUE, message=FALSE, warning=FALSE,result='asis'}
+description_df <- data.frame (
+                    #campo  = colnames(fifaData),
+                    tipo = sapply(data, class),
+                    description = c(
+                      "Velocidad de obturación máxima .",
+                      "Puntuación de review",
+                      "Puntuación calidad de construcción",
+                      "Número de puntos de enfoque",
+                      "Tipo de autofoco",
+                      "Enlace a la página",
+                      "Formatos de almacenamiento de vídeo",
+                      "Pantalla táctil",
+                      "Marca",
+                      "Puntos de la pantalla",
+                      "Disparos en modo ráfaga",
+                      "Conexión para micrófono",
+                      "Velocidad de obturación mínima",
+                      "Prioridad de obturador",
+                      "Dimensiones",
+                      "Número de lentes",
+                      "Puntuación de rendimiento",
+                      "Enlace a la review",
+                      "Amplificación del visor",
+                      "Observaciones sobre la estabilización de imagen",
+                      "Puntuación de calidad de pantalla",
+                      "Observaciones sobre GPS",
+                      "Número de usuarios que poseen la cámara",
+                      "ISO mínimo",
+                      "Puntuación de visor",
+                      "Puntuación de velocidad y respuesta",
+                      "Zoom óptico",
+                      "Número de usuarios que desean tener la cámara",
+                      "Modos de flash",
+                      "Balances de blancos personalizados",
+                      "Formato sin compresión",
+                      "Fecha de publicación",
+                      "Grabación de timelapse",
+                      "Preajustes de balances de blancos",
+                      "Multiplicador de la distancia focal",
+                      "Resolución máxima",
+                      "Puntuación de calidad de vídeo",
+                      "Vista en directo",
+                      "Descripción de la batería",
+                      "Resolución del sensor",
+                      "ISO máximo",
+                      "Tipo de pantalla",
+                      "Familia de la cámara",
+                      "Puntuación de imagen fija",
+                      "Cobertura del visor",
+                      "Mando a distancia",
+                      "Puntuación general",
+                      "Tamaño del sensor",
+                      "Velocidad de obturación máxima",
+                      "Modos de medición",
+                      "Estanqueidad",
+                      "Observaciones sobre conexión inalámbrica",
+                      "Distancia focal equivalente",
+                      "Modelo de cámara",
+                      "Formato de bateria",
+                      "Resolución del visor",
+                      "Puntuación de modo vídeo",
+                      "Modo de pantalla articulada",
+                      "Puntuación de calidad de imagen en RAW.",
+                      "Puntuación de conectividad",
+                      "Premio (Gold, Silver)",
+                      "Niveles de calidad JPEG",
+                      "Tamaño de la pantalla",
+                      "Peso con batería", # Extraer gramos por expresión regular
+                      "Píxeles efectivos",
+                      "Especificaciones rápidas",
+                      "Montura de lente",
+                      "Modo de exposición manual",
+                      "Puntuación de medición y enfoque",
+                      "Tipo de sensor",
+                      "Distancia mínima de enfoque",
+                      "Durabilidad",
+                      "Altavoz",
+                      "Resoluciones",
+                      "Número de usuarios que han poseido la cámara",
+                      "Puntuación de calidad de imagen JPG",
+                      "Puntuación de la óptica",
+                      "Tipo de visor",
+                      "Precio recomendado", # extraer mediante expresión regular el número
+                      "Puntuación de ergonomía y manejo",
+                      "Puntuación de rendimiento de flash",
+                      "GPS",
+                      "Puntuación de rendimiento en velocidad",
+                      "Cuenta atrás",
+                      "USB",
+                      "Otras resoluciones",
+                      "Puntuación de características",
+                      "Wireless",
+                      "Flash incluido",
+                      "Compensación de la exposición",
+                      "Puntuación de exactitud de exposición y enfoque",
+                      "Puntuación de ergonomía y manejo",
+                      "Flash externo",
+                      "AE Bracketing",
+                      "Ciclos de vida de la batería",
+                      "Carga por USB",
+                      "HDMI",
+                      "Modos",
+                      "Zoom digital",
+                      "Apertura máxima",
+                      "Rango del flash",
+                      "ISO",
+                      "Puntuación de review (porcentaje)",
+                      "Modos de escena",
+                      "Enfoque manual",
+                      "Estabilización de imagen",
+                      "Prioridad de apertura",
+                      "Orientación del sensor" ,
+                      "Puntuación CIPA de estabilización de imagen",
+                      "Observaciones sobre grabación en vídeo",
+                      "URL de imagen de la cámara",
+                      "Tipo de micrófono",
+                      "Puntuación con rendimeinto con luz baja e ISO alto",
+                      "Campo de visión",
+                      "Bracketing de balance de blancos",
+                      "Puntuación de las características de la camera y fotografía",
+                      "Procesador",
+                      "Ratio de imagen ancho x alto",
+                      "Distancia mínima modo macro",
+                      "Tipo de cuerpo", # IMPORTANTE
+                      "Conector de cascos",
+                      "Número de reviews", # Extraer número con expresión regular
+                      "Tipos de almacenamientos", 
+                      "Número de puntos de enfoque", # IMPORTANTE
+                      "Almacenamiento incluido") 
+                  )
+
+kable(description_df,caption="Propiedades de las cámaras")
+```
+
+Asimismo vamos a realizar una inspección rápida de los atributos mediante el comando `summary`
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+summary(data)
+```
+
+Veamos que aspecto tienen los datos mostrando las primeras filas:
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+head(fifaData)
+```
+
+# Comprobar atributos con valores vacíos
+
+Asignar `NA` a los atributos con valor cadena vacía
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+data <- data %>% mutate_all(list(~na_if(.,"")))
+```
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+na_count <-data.frame(sapply(data, function(y) sum(length(which(is.na(y))))))
+na_count
+```
+
+Eliminamos todos aquellos atributos que tengan más del 20% de atributos con valor `NA`
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+#https://stackoverflow.com/questions/31848156/delete-columns-rows-with-more-than-x-missing
+data <- data[, which(colMeans(!is.na(data)) > 0.2)]
+colnames(data)
+```
+
+# Reducción de la dimensionalidad
+Eliminar columnas ...
+
+# Verificar duplicación de registros
+
+No existe un campo ID. Se puede verificar la existencia de duplicados mediante la combinación de campos Brand+Name.
+
+Para comprobar si hay algún registro repetido utilizamos la función `unique` que proporciona los elementos únicos de una lista, en combinación con la función `nrow`, que obtiene el número de filas de un dataframe.
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+if (nrow(unique(data[,c("brand","name")]))!=nrow(data[,c("brand","name")])){
+  print("Hay alguna cámara repetida")
+}else{
+  print("No hay ninguna cámara repetida")
+}
+```
+
+
+
+
+# Archivo final
+
+
+Para guardar el `dataframe` resultado del procesamiento utilizamos la función `write.csv`:
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+write.csv(data, 'dpreview_clean.csv', row.names = FALSE)
+```
+
+
+# Referencias
+
+* Identificar y eliminar duplicados: [https://www.datanovia.com/en/lessons/identify-and-remove-duplicate-data-in-r/]
+* https://www.kaggle.com/karangadiya/fifa19
+* Tabla con medidas de tendencia central y dispersión: [https://cran.r-project.org/web/packages/qwraps2/vignettes/summary-statistics.html]
+* My favourite R package for: summarising data [https://dabblingwithdata.wordpress.com/2018/01/02/my-favourite-r-package-for-summarising-data/]
