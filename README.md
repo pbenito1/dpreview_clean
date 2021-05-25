@@ -8,7 +8,6 @@ Práctica 2de la asignatura *"Tipología y ciclo de vida de los datos"* del [Má
 * Pablo Benito
 * Miquel Rived 
 
-
 # Descripción del dataset. 
 
 > ¿Por qué es importante y qué pregunta/problema pretende responder?
@@ -48,7 +47,9 @@ Esta práctica se ha realizado bajo el contexto de la asignatura Tipología y ci
 El *notebook* de limpieza de datos se  se ha desarrollado en R. 
 
 
-El código fuente del *notebook* se puede consultar [aquí](PRA2.Rmd)
+El código fuente del *notebook* se puede consultar [aquí](PRA2.Rmd).
+
+El resultado de la ejecución del *notebook* se puede consultar [aquí](https://htmlpreview.github.io/?https://github.com/pbenito1/dpreview_clean/blob/main/PRA2.html).
 
 # Contribuciones al proyecto
 
