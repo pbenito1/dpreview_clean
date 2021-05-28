@@ -202,6 +202,68 @@ Veamos que aspecto tienen los datos mostrando las primeras filas:
 head(data)
 ```
 
+
+
+# Reducción de la dimensionalidad
+Seleccionamos exclusivamente con las siguientes columnas, además, para facilitar el análisis posterior, las renombramos a los nombres indicados.
+
+## Variables cuantitativas
+
+- Los relativos a la **puntuación del equipo de expertos** de dpreview:
+  - `review.score`: Puntuación de la review. Renombramos a `puntuacion.review`
+  - `Build.quality`: Puntuación calidad de construcción. Renombramos a `puntuacion.calidad_construccion`
+  - `Performance`: Puntuación del rendimiento. Renombramos a `puntuación.rendimiento`
+  - `Screen.Quality`: Puntuación de la calidad de la pantalla. Renombramos a `puntuacion.calidad.pantalla`
+  - `Viewfinder…screen.rating`: Puntuación del visor. Renombramos a `puntuacion.visor`
+  - `Speed.and.Responsiveness`: Puntuación velocidad y respuesta. Renombramos a `puntuacion.velocidad_respuesta`
+  - `Video.Quality`: Puntuación de calidad de vídeo. Renombramos a `puntuacion.calidad_video`
+  - `Still.Image.Quality`: Puntuación de imagen fija. Renombramos a `puntuacion.calidad_imagen_fija`
+  - `Value`: Puntuación general. Renombramos a `puntuacion.general`
+  - `Movie…video.mode`: Puntuación del modo vídeo. Renombramos a `puntuacion.modeo_video`
+  - `Image.quality..raw.`: Puntuación de la calidad de imagen RAW. Renombramos a `puntuacion.calidad_raw`
+  - `Connectivity`: Puntuación de conectividad. Renombramos a `puntuacion.conectividad`
+  - `Metering…focus.accuracy`: Puntuación de medición y enfoque. Renombramos a `puntuacion.precision`
+  - `Image.quality..jpeg.`: Puntuación de imagen JPG. Renombramos a `puntuacion.calidad_jpg`
+  - `Optics`: Puntuación de óptica. Renombramos a `puntuacion.optica`
+  - `Ergonomics.and.Handling`: Puntuación de ergonomía y manejo. Renombramos a `puntuacion.ergonomia_manejo`
+  - `Flash.performance`: Puntuación de rendimiento del flash. Renombramos a `puntuacion.rendimento_flash`
+  - `Performance..speed.`: Puntuación de rendimiento en velocidad. Renombramos a `puntuacion.rendimiento_velocidad`
+  - `Features`: Puntuación de características. Renombramos a `puntuacion.caracteristicas`
+  - `Exposure.and.focus.accuracy`: Puntuación de precisión de exposición y enfoque. Renombramos a `puntuacion.precision_exposicion_enfoque`
+  - `Ergonomics…handling`: Puntuación de ergonomía y manejo. Renombramos a `puntuacion.`
+  - `review_value`: Puntuación de review (porcentaje). Renombramos a `puntuacion.review`
+  - `CIPA.image.stabilization.rating`: Puntuación de estabilización de imagen. Renombramos a `puntuacion.`
+  - `Low.light…high.ISO.performance`: Puntuación con rendimeinto con luz baja e ISO alto. Renombramos a `puntuacion.luz_baja_alto_ISO`
+  - `Camera.and.Photo.Features`: Puntuación de las características de la camera y fotografía. Renombramos a `puntuacion.caracteristicas_camara_foto`
+
+- Las relativos a las **características físicas de la cámara**:
+  - `Weight..inc..batteries`: Peso. Renombramos a `caracteristicas.peso`
+  - `Dimensions`: Dimensiones (ancho x alto x fondo). Renombramos a `caracteristicas.dimensiones`
+
+- Las relativas al **interés por parte de los usuarios de la comunidad** de dpreview: 
+   - own_gear. Renombramos a `usuario.tiene`
+   - had_gear. Renombramos a `usuario.ha_tenido`
+   - want_gear. Renombramos a `usuario.desea`
+   - review_score: Puntuación media por parte de los usuarios de la comunidad. Renombramos a `usuario.puntuacion`
+
+- El **precio de la cámara**: `MSRP`. Renombramos a `precio`
+
+- Las relativas a **características técnicas** de la cámara: 
+    - `Max.resolution`: resolución, renombramos a `caracteristicas.resolucion`
+    -` Maximum.shutter.speed`: velocidad máxima de obturador, renombramos a `caracteristicas.velocidad_obturador`
+
+  
+## Variables cualitativas
+- Marca y  modelo de la cámara:
+    - `Brand`: Marca, renombramos a `marca`
+    - `name`: Modelo, renombramos a `modelo`
+- Otras características:
+    - `Body.type`: Tipo de cuerpo, renombramos a `tipo_cuerpo`
+    - `Sensor.type`: Tipo de sensor, renombramos a `tipo_sensor`
+    - `announcement_date`: Fecha de lanzamiento, renombramos a `fecha_lanzamiento`
+    
+  
+
 # Comprobar atributos con valores vacíos
 
 Asignar `NA` a los atributos con valor cadena vacía
@@ -221,8 +283,14 @@ data <- data[, which(colMeans(!is.na(data)) > 0.2)]
 colnames(data)
 ```
 
-# Reducción de la dimensionalidad
-Eliminar columnas ...
+# Imputación de valores vacios
+
+## Puntuaciones
+Para las puntuaciones imputar la media de las cámaras de la misma marca y tipo de cámara.
+Si no hay resultados, imputar la media del mismo tipo de cámara.
+Si no hay resultados, imputar la media del atributo.
+
+
 
 # Verificar duplicación de registros
 
