@@ -33,7 +33,7 @@ library(stringr)
 library(lubridate)
 library(purrr)
 library(RcmdrMisc)
-library(ggbiplot)
+# library(ggbiplot)
 library(summarytools)
 library(kableExtra)
 
@@ -43,7 +43,8 @@ En primer lugar cargamos el archivo utilizando la función `read.csv`. añadimos
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 # Cargamos el fichero de datos
-data <- read.csv('dpreview.csv',stringsAsFactors = FALSE)
+data <- read.csv('dpreview.csv'#,stringsAsFactors = FALSE)
+)
 ```
 
 Verificamos el tipo de datos asignado por R a cada atributo utilizando el comando `str` (`structure`):
@@ -190,6 +191,18 @@ description_df <- data.frame (
 kable(description_df,caption="**Propiedades de las cámaras**") %>% kable_styling()
 ```
 
+## Columnas con las que nos quedamos
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+columnas <- c("review.score","Performance", "Value", "Features", "review_value", "MSRP", "brand", "name", "Body.Type", "Sensor.type", "Max.resolution", "review_score", "Dimensions", "review_value", "GPS", "own_gear","want_gear","review_award")
+data <- data[ , (names(data) %in% columnas)]
+patron <- "\\d*\\.?\\d*"
+data$MSRP
+data$MSRP <- sapply(data$MSRP, grep, pattern = patron)
+data$MSRP
+
+```
+
 Asimismo vamos a realizar una inspección rápida de los atributos mediante el comando `summary`
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
@@ -279,6 +292,7 @@ Eliminamos todos aquellos atributos que tengan más del 20% de atributos con val
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 #https://stackoverflow.com/questions/31848156/delete-columns-rows-with-more-than-x-missing
+# Esto no lo haría porque creo que nos estamos cargando el precio
 data <- data[, which(colMeans(!is.na(data)) > 0.2)]
 colnames(data)
 ```
@@ -305,7 +319,13 @@ if (nrow(unique(data[,c("brand","name")]))!=nrow(data[,c("brand","name")])){
 }
 ```
 
+# Valores extremos
 
+```{r message= FALSE, warning=FALSE}
+#boxplot(data$Value)
+#out = boxplot.stats(data$Value)$out
+#out
+```
 
 
 # Archivo final
@@ -315,6 +335,27 @@ Para guardar el `dataframe` resultado del procesamiento utilizamos la función `
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 write.csv(data, 'dpreview_clean.csv', row.names = FALSE)
+```
+
+
+# Pruebas Estadísticas para comparación de los datos
+
+# Pruebas de hipótesis
+
+```{r message= FALSE, warning=FALSE}
+#Review_GPS = filter(data, GPS == "Built-in" || GPS == "Optional")$Value
+#Review_NoGPS = filter(data, GPS == "None")$Value
+#f_obs = sd(Review_GPS)^2/sd(Review_NoGPS)^2
+#f_obs
+#qf(0.975,df1 = length(Review_GPS)-1, df2 = length(Review_NoGPS)-1)
+```
+
+#Regresión lineal
+
+```{r message= FALSE, warning=FALSE}
+#lineal_regression = lm(precio ~ XXXX, data = data)
+#summary(lineal_regression)
+
 ```
 
 
