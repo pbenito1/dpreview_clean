@@ -15,6 +15,8 @@ output:
     highlight: zenburn
     toc: yes
   word_document: default
+editor_options: 
+  chunk_output_type: inline
 ---
 
 ******
@@ -43,8 +45,7 @@ En primer lugar cargamos el archivo utilizando la función `read.csv`. añadimos
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 # Cargamos el fichero de datos
-data <- read.csv('dpreview.csv'#,stringsAsFactors = FALSE)
-)
+data <- read.csv('dpreview.csv',stringsAsFactors = FALSE)
 ```
 
 Verificamos el tipo de datos asignado por R a cada atributo utilizando el comando `str` (`structure`):
@@ -191,19 +192,7 @@ description_df <- data.frame (
 kable(description_df,caption="**Propiedades de las cámaras**") %>% kable_styling()
 ```
 
-## Columnas con las que nos quedamos
-
-```{r echo=TRUE, message=FALSE, warning=FALSE}
-columnas <- c("review.score","Performance", "Value", "Features", "review_value", "MSRP", "brand", "name", "Body.Type", "Sensor.type", "Max.resolution", "review_score", "Dimensions", "review_value", "GPS", "own_gear","want_gear","review_award")
-data <- data[ , (names(data) %in% columnas)]
-patron <- "\\d*\\.?\\d*"
-data$MSRP
-data$MSRP <- sapply(data$MSRP, grep, pattern = patron)
-data$MSRP
-
-```
-
-Asimismo vamos a realizar una inspección rápida de los atributos mediante el comando `summary`
+Vamos a realizar una inspección rápida de los atributos mediante el comando `summary`
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 summary(data)
@@ -223,7 +212,7 @@ Seleccionamos exclusivamente con las siguientes columnas, además, para facilita
 ## Variables cuantitativas
 
 - Los relativos a la **puntuación del equipo de expertos** de dpreview:
-  - `review.score`: Puntuación de la review. Renombramos a `puntuacion.review`
+  - `review_score`: Puntuación de la review. Renombramos a `puntuacion.review`
   - `Build.quality`: Puntuación calidad de construcción. Renombramos a `puntuacion.calidad_construccion`
   - `Performance`: Puntuación del rendimiento. Renombramos a `puntuación.rendimiento`
   - `Screen.Quality`: Puntuación de la calidad de la pantalla. Renombramos a `puntuacion.calidad.pantalla`
@@ -232,38 +221,87 @@ Seleccionamos exclusivamente con las siguientes columnas, además, para facilita
   - `Video.Quality`: Puntuación de calidad de vídeo. Renombramos a `puntuacion.calidad_video`
   - `Still.Image.Quality`: Puntuación de imagen fija. Renombramos a `puntuacion.calidad_imagen_fija`
   - `Value`: Puntuación general. Renombramos a `puntuacion.general`
-  - `Movie…video.mode`: Puntuación del modo vídeo. Renombramos a `puntuacion.modeo_video`
+  - `Movie…video.mode`: Puntuación del modo vídeo. Renombramos a `puntuacion.modo_video`
   - `Image.quality..raw.`: Puntuación de la calidad de imagen RAW. Renombramos a `puntuacion.calidad_raw`
   - `Connectivity`: Puntuación de conectividad. Renombramos a `puntuacion.conectividad`
   - `Metering…focus.accuracy`: Puntuación de medición y enfoque. Renombramos a `puntuacion.precision`
   - `Image.quality..jpeg.`: Puntuación de imagen JPG. Renombramos a `puntuacion.calidad_jpg`
   - `Optics`: Puntuación de óptica. Renombramos a `puntuacion.optica`
-  - `Ergonomics.and.Handling`: Puntuación de ergonomía y manejo. Renombramos a `puntuacion.ergonomia_manejo`
+  - `Ergonomics...handling`: Puntuación de ergonomía y manejo. Renombramos a `puntuacion.ergonomia_manejo`
   - `Flash.performance`: Puntuación de rendimiento del flash. Renombramos a `puntuacion.rendimento_flash`
   - `Performance..speed.`: Puntuación de rendimiento en velocidad. Renombramos a `puntuacion.rendimiento_velocidad`
   - `Features`: Puntuación de características. Renombramos a `puntuacion.caracteristicas`
   - `Exposure.and.focus.accuracy`: Puntuación de precisión de exposición y enfoque. Renombramos a `puntuacion.precision_exposicion_enfoque`
-  - `Ergonomics…handling`: Puntuación de ergonomía y manejo. Renombramos a `puntuacion.`
   - `review_value`: Puntuación de review (porcentaje). Renombramos a `puntuacion.review`
-  - `CIPA.image.stabilization.rating`: Puntuación de estabilización de imagen. Renombramos a `puntuacion.`
   - `Low.light…high.ISO.performance`: Puntuación con rendimeinto con luz baja e ISO alto. Renombramos a `puntuacion.luz_baja_alto_ISO`
   - `Camera.and.Photo.Features`: Puntuación de las características de la camera y fotografía. Renombramos a `puntuacion.caracteristicas_camara_foto`
+  
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+data<- rename(data,
+               puntuacion.calidad_construccion=Build.quality,
+               puntuación.rendimiento=Performance,
+               puntuacion.calidad.pantalla=Screen.Quality,
+               puntuacion.visor=Viewfinder...screen.rating,
+               puntuacion.velocidad_respuesta=Speed.and.Responsiveness,
+               puntuacion.calidad_video=Video.Quality,
+               puntuacion.calidad_imagen_fija=Still.Image.Quality,
+               puntuacion.general=Value,
+               puntuacion.modo_video=Movie...video.mode,
+               puntuacion.puntuacion_calidad_raw=Image.quality..raw.,
+               puntuacion.conectividad=Connectivity,
+               puntuacion.precision=Metering...focus.accuracy,
+               puntuacion.calidad_jpg=Image.quality..jpeg.,
+               puntuacion.optica=Optics,
+               puntuacion.ergonomia_manejo=Ergonomics...handling,
+               puntuacion.rendimento_flash=Flash.performance,
+               puntuacion.rendimiento_velocidad=Performance..speed.,
+               puntuacion.caracteristicas=Features,
+               puntuacion.precision_exposicion_enfoque=Exposure.and.focus.accuracy,
+               puntuacion.pro_review=review_value,
+               puntuacion.luz_baja_alto_ISO=Low.light...high.ISO.performance,
+               puntuacion.caracteristicas_camara_foto=Camera.and.Photo.Features)
+```
 
 - Las relativos a las **características físicas de la cámara**:
   - `Weight..inc..batteries`: Peso. Renombramos a `caracteristicas.peso`
   - `Dimensions`: Dimensiones (ancho x alto x fondo). Renombramos a `caracteristicas.dimensiones`
 
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+data<- rename(data,
+               caracteristicas.peso=Weight..inc..batteries.,
+               caracteristicas.dimensiones=Dimensions)
+```
 - Las relativas al **interés por parte de los usuarios de la comunidad** de dpreview: 
    - own_gear. Renombramos a `usuario.tiene`
    - had_gear. Renombramos a `usuario.ha_tenido`
    - want_gear. Renombramos a `usuario.desea`
    - review_score: Puntuación media por parte de los usuarios de la comunidad. Renombramos a `usuario.puntuacion`
 
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+data<- rename(data,
+               usuario.tiene=own_gear,
+               usuario.ha_tenido=had_gear,
+               usuario.desea=want_gear,
+               usuario.puntuacion=review_score)
+```
+
 - El **precio de la cámara**: `MSRP`. Renombramos a `precio`
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+data<- rename(data,
+               precio=MSRP)
+```
 
 - Las relativas a **características técnicas** de la cámara: 
     - `Max.resolution`: resolución, renombramos a `caracteristicas.resolucion`
     -` Maximum.shutter.speed`: velocidad máxima de obturador, renombramos a `caracteristicas.velocidad_obturador`
+    
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+data<- rename(data,
+               caracteristicas.resolucion=Max.resolution,
+               caracteristicas.velocidad_obturador=Maximum.shutter.speed
+              )
+```
 
   
 ## Variables cualitativas
@@ -274,37 +312,102 @@ Seleccionamos exclusivamente con las siguientes columnas, además, para facilita
     - `Body.type`: Tipo de cuerpo, renombramos a `tipo_cuerpo`
     - `Sensor.type`: Tipo de sensor, renombramos a `tipo_sensor`
     - `announcement_date`: Fecha de lanzamiento, renombramos a `fecha_lanzamiento`
-    
-  
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+data<- rename(data,
+               marca=brand,
+               modelo=name,
+               tipo_cuerpo=Body.type,
+               tipo_sensor=Sensor.type,
+               fecha_lanzamiento=announcement_date
+              )
+
+```
+
+Convertimos a factor los atributos:
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+data$marca<-as.factor(data$marca)
+data$tipo_cuerpo<-as.factor(data$tipo_cuerpo)
+data$tipo_sensor<-as.factor(data$tipo_sensor)
+data$caracteristicas.velocidad_obturador<-as.factor(data$caracteristicas.velocidad_obturador)
+```
+
+Finalmente aplicamos la reducción de la dimensionalidad, filtrando únicamente las columnas que nos interesan
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+data <- data[ , grepl( "puntuacion|caracteristicas|tipo_|fecha_lanzamiento|marca|modelo|precio" , names( data ) ) ]
+```
+
+# Extraccción de valores numéricos
+
+## Atributo `precio`
+Los valores de la columna `precio` tiene diversos tipos de valores. En la mayoría de las filas contiene un único precio en dólares, precedido del símbolo de dolar (p.ej. `$899`), pero en algunos casos incluye varios precios en función del kit a comprar (con objetivo, sin objetivo, con varios ojetivos,...) y en otros casos se muestra el precio tanto en dólares como en otras monedas (euro y libras).
+
+Para simplificar la extracción, nos quedaremos con el primer precio que aparezca precedido del símbolo del dólar utilizando una expresión regular. 
+
+Otras posibles alternativas en el tratamiento de este atributo podría haber sido obtener todos los posibles valores precedidos del símbolo dólar y quedarnos con el máximo, o hacer una conversión entre divisas según el cambio euro->dólar y libra->dolar.
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+data$precio<-as.integer(str_extract(str_extract(data$precio, "(\\$\\d+)"),"(\\d+)"))
+```
+
+
+## Atributo `puntuacion.pro_review`
+
+Este atributo contiene un porcentaje que incluye el símbolo `%`. Interesa convertirlo a entero y eliminar ese porcentaje. Utilizaremos para ello una expresión regular y la función `str_extract` del paquete `stringr`
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+data$puntuacion.pro_review<-as.integer(str_extract(data$puntuacion.pro_review, "(\\d+)"))
+```
+
+## Atributo `caracteristicas.peso`
+
+Este atributo expresa el peso tanto en gramos como en libras y onzas. Utilizaremos una expresión regular para quedarnos con el peso en gramos
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+data$caracteristicas.peso<-as.integer(str_extract(data$caracteristicas.peso, "(\\d+)"))
+
+```
+
+# Extracción de fecha
+
+La fecha de lanzamiento de la cámara viene especificada en el atributo `fecha_lanzamiento`. El formato del campo varía en función de si el lanzamiento ha sido hace menos de un año (p.ej. "`Announced 7 months ago`"), o hace más de un año (p.ej. "`Announced Jan 15, 2016`"). En cualquier caso, de cara al análisis sólo nos interesa quedarnos con el año de lanzamiento. Utilizaremos una expresión regular para obtener el año, y en caso de que no tenga éxito, asignaremos el valor actual.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+data$fecha_lanzamiento <- as.integer(str_extract(data$fecha_lanzamiento, "(\\d\\d\\d\\d)"))
+# Asignamos por defecto al año 2020
+data[is.na(data$fecha_lanzamiento),"fecha_lanzamiento"] = 2020
+
+```
 
 # Comprobar atributos con valores vacíos
 
 Asignar `NA` a los atributos con valor cadena vacía
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
-data <- data %>% mutate_all(list(~na_if(.,"")))
+#data <- data %>% mutate_all(list(~na_if(.,"")))
 ```
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
-na_count <-data.frame(sapply(data, function(y) sum(length(which(is.na(y))))))
-na_count
+#na_count <-data.frame(sapply(data, function(y) sum(length(which(is.na(y))))))
+#na_count
 ```
 
-Eliminamos todos aquellos atributos que tengan más del 20% de atributos con valor `NA`
+Eliminamos todos aquellos atributos tipo "puntuación" que tengan más del 10% de atributos con valor `NA`
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 #https://stackoverflow.com/questions/31848156/delete-columns-rows-with-more-than-x-missing
 # Esto no lo haría porque creo que nos estamos cargando el precio
-data <- data[, which(colMeans(!is.na(data)) > 0.2)]
-colnames(data)
+data.puntuacion <- data%>%select(starts_with("puntuacion"))
+atributes_to_remove<-colnames(data.puntuacion[, which(colMeans(!is.na(data.puntuacion)) > 0.1)])
+data<-data %>% select(-atributes_to_remove)
+print("Atributos eliminados:")
+atributes_to_remove
+
 ```
-
-# Imputación de valores vacios
-
-## Puntuaciones
-Para las puntuaciones imputar la media de las cámaras de la misma marca y tipo de cámara.
-Si no hay resultados, imputar la media del mismo tipo de cámara.
-Si no hay resultados, imputar la media del atributo.
-
-
 
 # Verificar duplicación de registros
 
@@ -318,6 +421,37 @@ if (nrow(unique(data[,c("brand","name")]))!=nrow(data[,c("brand","name")])){
   print("No hay ninguna cámara repetida")
 }
 ```
+
+
+# Imputación de valores vacios
+
+## Puntuaciones
+Para las puntuaciones imputar la media de las cámaras de la misma marca y tipo de cámara.
+Si no hay resultados, imputar la media del mismo tipo de cámara.
+Si no hay resultados, imputar la media del atributo.
+
+
+
+Para ajustarlos, **se imputan a estos registros el valor más común (moda) para el mismo empleado y motivación**:
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+marcas <-unique(data$marca)
+tipos_cuerpo <-unique(data$tipo_cuerpo)
+
+for (p in colnames(data%>%select(starts_with("puntuacion")))){
+  for (m in marcas){
+    for (t in tipos_cuerpo){
+      #media_marca_cuerpo<- mean(data %>% filter(marca==m,tipo_cuerpo==t)%>%select(p))
+      media_marca_cuerpo<-0
+      paste("---> ",m," ",t," ",p," -->Media:",media_marca_cuerpo)
+    }
+  }
+}
+
+```
+
+
+
 
 # Valores extremos
 
