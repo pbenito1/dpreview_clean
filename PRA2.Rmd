@@ -396,13 +396,13 @@ Asignar `NA` a los atributos con valor cadena vacía
 #na_count
 ```
 
-Eliminamos todos aquellos atributos tipo "puntuación" que tengan más del 10% de atributos con valor `NA`
+Eliminamos todos aquellos atributos tipo "puntuación" que tengan más del 90% de atributos con valor `NA`
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 #https://stackoverflow.com/questions/31848156/delete-columns-rows-with-more-than-x-missing
 # Esto no lo haría porque creo que nos estamos cargando el precio
 data.puntuacion <- data%>%select(starts_with("puntuacion"))
-atributes_to_remove<-colnames(data.puntuacion[, which(colMeans(!is.na(data.puntuacion)) > 0.1)])
+atributes_to_remove<-colnames(data.puntuacion[, which(colMeans(is.na(data.puntuacion)) > 0.9)])
 data<-data %>% select(-atributes_to_remove)
 print("Atributos eliminados:")
 atributes_to_remove
@@ -415,7 +415,7 @@ No existe un campo ID. Se puede verificar la existencia de duplicados mediante l
 
 Para comprobar si hay algún registro repetido utilizamos la función `unique` que proporciona los elementos únicos de una lista, en combinación con la función `nrow`, que obtiene el número de filas de un dataframe.
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
-if (nrow(unique(data[,c("brand","name")]))!=nrow(data[,c("brand","name")])){
+if (nrow(unique(data[,c("marca","modelo")]))!=nrow(data[,c("marca","modelo")])){
   print("Hay alguna cámara repetida")
 }else{
   print("No hay ninguna cámara repetida")
@@ -426,50 +426,50 @@ if (nrow(unique(data[,c("brand","name")]))!=nrow(data[,c("brand","name")])){
 # Imputación de valores vacios
 
 ## Puntuaciones
-Para las puntuaciones imputar la media de las cámaras de la misma marca y tipo de cámara.
-Si no hay resultados, imputar la media del mismo tipo de cámara.
-Si no hay resultados, imputar la media del atributo.
 
-
-
-Para ajustarlos, **se imputan a estos registros el valor más común (moda) para el mismo empleado y motivación**:
-
+Imputamos inicialnente con la media de la misma marca y tipo de cuerpo:
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
-marcas <-unique(data$marca)
-tipos_cuerpo <-unique(data$tipo_cuerpo)
+data<-data %>%
+    group_by(marca,tipo_cuerpo) %>%
+    mutate_each(funs(replace(., which(is.na(.)), mean(., na.rm=TRUE))), 
+       starts_with('puntuacion'))
+```
 
-for (p in colnames(data%>%select(starts_with("puntuacion")))){
-  for (m in marcas){
-    for (t in tipos_cuerpo){
-      #media_marca_cuerpo<- mean(data %>% filter(marca==m,tipo_cuerpo==t)%>%select(p))
-      media_marca_cuerpo<-0
-      paste("---> ",m," ",t," ",p," -->Media:",media_marca_cuerpo)
-    }
-  }
-}
+En caso de los valores que sigan siendo `NA` utilizamos la media de la marca:
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+data<-data %>%
+    group_by(marca) %>%
+    mutate_each(funs(replace(., which(is.na(.)), mean(., na.rm=TRUE))), 
+       starts_with('puntuacion'))
+```
 
+Y si continua siendo `NA` imputamos por la media de la puntuación:
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+data<-data %>%
+    mutate_each(funs(replace(., which(is.nan(.)), mean(., na.rm=TRUE))), 
+       starts_with('puntuacion'))
 ```
 
 
-
-
-# Valores extremos
-
-```{r message= FALSE, warning=FALSE}
-#boxplot(data$Value)
-#out = boxplot.stats(data$Value)$out
-#out
-```
-
-
-# Archivo final
-
+# Archivo limpio
 
 Para guardar el `dataframe` resultado del procesamiento utilizamos la función `write.csv`:
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 write.csv(data, 'dpreview_clean.csv', row.names = FALSE)
 ```
+
+# Valores extremos
+
+# Precio
+Veamos los valores extremos del precio de las cámaras
+```{r message= FALSE, warning=FALSE}
+boxplot(data$precio)
+out = boxplot.stats(data$precio)$out
+out
+```
+
+
 
 
 # Pruebas Estadísticas para comparación de los datos
