@@ -458,10 +458,24 @@ Para guardar el `dataframe` resultado del procesamiento utilizamos la función `
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 write.csv(data, 'dpreview_clean.csv', row.names = FALSE)
 ```
+# Análisis exploratorio
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+ggplot(data, aes(x=precio, y=tipo_cuerpo)) + 
+    geom_boxplot()
+```
+Lógicamente las cámaras más caras son las SLR "grandes", que son las que se emplean profesionalmente. Las compactas, ultracompactas y cámaras de acción son las más asequibles.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+ggplot(data, aes(x=fecha_lanzamiento, fill=tipo_sensor)) +
+    geom_histogram( color="#e9ecef",position = 'identity')
+
+```
+Se puede observar que el boom de las cámaras digitales tuvo lugar entre el año 2000 y el año 2015. Posiblemente el declive se debió a mejora de las cámaras de los dispositivos móviles. Asimismo se puede observar, a través del código de colores, la evolución en el tipo de sensores que equipan las cámaras, pasando de sensores CCD al comienzo de la tecnología a sensores CMOS, que han copado el mercado desde el 2012.
 
 # Valores extremos
 
-# Precio
+## Precio
 Veamos los valores extremos del precio de las cámaras
 ```{r message= FALSE, warning=FALSE}
 boxplot(data$precio)
