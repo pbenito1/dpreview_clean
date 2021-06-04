@@ -548,7 +548,7 @@ t.test( data %>%filter(marca=="Nikon")%>%pull(puntuacion.general),
 En este caso el resultado del t-test ofrece un `p-value` de 4.251e-08, inferior a 0.05, con lo que rechazamos la hipótesis nula y confirmamos con un 95% de confianza que no  hay diferencia significativa entre la puntuación general de Canon y Nikon.
 
 
-#Regresión lineal
+# Regresión lineal
 
 ```{r message= FALSE, warning=FALSE}
 #lineal_regression = lm(precio ~ XXXX, data = data)
