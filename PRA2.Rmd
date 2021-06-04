@@ -372,10 +372,24 @@ Este atributo expresa el peso tanto en gramos como en libras y onzas. Utilizarem
 data$caracteristicas.peso<-as.integer(str_extract(data$caracteristicas.peso, "(\\d+)"))
 
 ```
+# Ajuste de variables discretas
+
+## Tipo de sensor
+
+La variable `tipo_sensor contiene diversos valores que se pueden agrupar en dos grandes grupos: CCD y CMOS. Realizamos esta simplificación:
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# https://stackoverflow.com/questions/25372082/create-column-based-on-presence-of-string-pattern-and-ifelse
+data$tipo_sensor<-ifelse(grepl("CMOS",data$tipo_sensor),'CMOS','CCD')
+```
+
 
 # Extracción de fecha
 
-La fecha de lanzamiento de la cámara viene especificada en el atributo `fecha_lanzamiento`. El formato del campo varía en función de si el lanzamiento ha sido hace menos de un año (p.ej. "`Announced 7 months ago`"), o hace más de un año (p.ej. "`Announced Jan 15, 2016`"). En cualquier caso, de cara al análisis sólo nos interesa quedarnos con el año de lanzamiento. Utilizaremos una expresión regular para obtener el año, y en caso de que no tenga éxito, asignaremos el valor actual.
+La fecha de lanzamiento de la cámara viene especificada en el atributo `fecha_lanzamiento`.
+
+El formato del campo varía en función de si el lanzamiento ha sido hace menos de un año (p.ej. "`Announced 7 months ago`"), o hace más de un año (p.ej. "`Announced Jan 15, 2016`"). En cualquier caso, de cara al análisis sólo nos interesa quedarnos con el año de lanzamiento. Utilizaremos una expresión regular para obtener el año, y en caso de que no tenga éxito, asignaremos el valor actual.
+
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 
@@ -383,13 +397,14 @@ data$fecha_lanzamiento <- as.integer(str_extract(data$fecha_lanzamiento, "(\\d\\
 # Asignamos por defecto al año 2020
 data[is.na(data$fecha_lanzamiento),"fecha_lanzamiento"] = 2020
 
+data$fecha_lanzamiento <-as.factor(data$fecha_lanzamiento)
 ```
 
 # Comprobar atributos con valores vacíos
 
-Asignar `NA` a los atributos con valor cadena vacía
+Asignamos  `NA` a los atributos con valor cadena vacía
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
-#data <- data %>% mutate_all(list(~na_if(.,"")))
+data <- data %>% mutate_all(list(~na_if(.,"")))
 ```
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 #na_count <-data.frame(sapply(data, function(y) sum(length(which(is.na(y))))))
@@ -427,7 +442,7 @@ if (nrow(unique(data[,c("marca","modelo")]))!=nrow(data[,c("marca","modelo")])){
 
 ## Puntuaciones
 
-Imputamos inicialnente con la media de la misma marca y tipo de cuerpo:
+Para todos los atributos de tipo ´puntuacion.xxxx´, imputamos inicialmente con la **media de la misma marca y tipo de cuerpo**:
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 data<-data %>%
     group_by(marca,tipo_cuerpo) %>%
@@ -435,7 +450,7 @@ data<-data %>%
        starts_with('puntuacion'))
 ```
 
-En caso de los valores que sigan siendo `NA` utilizamos la media de la marca:
+En caso de los valores que sigan siendo `NA` utilizamos la **media de la marca**:
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 data<-data %>%
     group_by(marca) %>%
@@ -443,7 +458,7 @@ data<-data %>%
        starts_with('puntuacion'))
 ```
 
-Y si continua siendo `NA` imputamos por la media de la puntuación:
+Y si continua siendo `NA` imputamos por la **media general de la puntuación**:
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 data<-data %>%
     mutate_each(funs(replace(., which(is.nan(.)), mean(., na.rm=TRUE))), 
@@ -464,14 +479,27 @@ write.csv(data, 'dpreview_clean.csv', row.names = FALSE)
 ggplot(data, aes(x=precio, y=tipo_cuerpo)) + 
     geom_boxplot()
 ```
+
 Lógicamente las cámaras más caras son las SLR "grandes", que son las que se emplean profesionalmente. Las compactas, ultracompactas y cámaras de acción son las más asequibles.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 ggplot(data, aes(x=fecha_lanzamiento, fill=tipo_sensor)) +
-    geom_histogram( color="#e9ecef",position = 'identity')
+    geom_bar()+theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
 ```
-Se puede observar que el boom de las cámaras digitales tuvo lugar entre el año 2000 y el año 2015. Posiblemente el declive se debió a mejora de las cámaras de los dispositivos móviles. Asimismo se puede observar, a través del código de colores, la evolución en el tipo de sensores que equipan las cámaras, pasando de sensores CCD al comienzo de la tecnología a sensores CMOS, que han copado el mercado desde el 2012.
+
+Se puede observar que el boom de las cámaras digitales tuvo lugar entre el año 2000 y el año 2015. Posiblemente el declive se debió a mejora de las cámaras de los dispositivos móviles. Asimismo se puede observar, a través del código de colores, la evolución en el tipo de sensores que equipan las cámaras, pasando de sensores CCD en las fases iniciales a sensores CMOS, que han copado el mercado desde el 2013.
+
+
+Veamos la evolución a continuación en función del tipo de cámara:
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+ggplot(data, aes(x=fecha_lanzamiento, fill=tipo_cuerpo)) +
+    geom_bar()+theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+```
+
+Como habíamos indicado anteriormente, la aparición de dispositivos móviles con cámaras de calidad ha hecho desaparecer prácticamente por completo el segmento de las cámaras compactas y ultracompactas, manteniendose únicamente actualizadas el sector de las cámaras profesionales.
 
 # Valores extremos
 
@@ -490,13 +518,35 @@ out
 
 # Pruebas de hipótesis
 
+Siempre ha habido un gran debate entre los profesionales de la fotografía acerca de qué marca es mejor, si Canon o Nikon.
+Vamos a verificar mediante un contraste de hipótesis sobre la variable `puntuacion.general` si existe una diferencia significativa entre ambas marcas.
+
+Las hipótesis nula y alternativa serían:
+
+- $H_0$: No existe una diferencia significativa entre Canon y Nikon
+- $H_1$: Sí existe una diferencia significativa entre Canon y Nikon
+
+
+Suponemos normalidad en las muestras  por el Teorema del Límite Central dado que contamos con un conjunto de muestras grande.
+
+Comprobamos la homogeneidad de varianzas
 ```{r message= FALSE, warning=FALSE}
-#Review_GPS = filter(data, GPS == "Built-in" || GPS == "Optional")$Value
-#Review_NoGPS = filter(data, GPS == "None")$Value
-#f_obs = sd(Review_GPS)^2/sd(Review_NoGPS)^2
-#f_obs
-#qf(0.975,df1 = length(Review_GPS)-1, df2 = length(Review_NoGPS)-1)
+
+var.test( data %>%filter(marca=="Nikon")%>%pull(puntuacion.general), data %>%filter(marca=="Canon")%>%pull(puntuacion.general) )
 ```
+El p-value da un valor por debajo de 0.05, por lo que podemos suponer que las muestras tienen la misma varianza con un 95% de confianza.
+
+Aplicamos a continuación el contraste de hipótesis
+```{r message= FALSE, warning=FALSE}
+t.test( data %>%filter(marca=="Nikon")%>%pull(puntuacion.general),
+        data %>%filter(marca=="Canon")%>%pull(puntuacion.general), # dos muestras 
+        alternative = "two.sided", # contraste bilateral 
+        paired = FALSE, # muestras independientes
+        var.equal = TRUE ) # se supone homocedasticidad
+```
+
+En este caso el resultado del t-test ofrece un `p-value` de 4.251e-08, inferior a 0.05, con lo que rechazamos la hipótesis nula y confirmamos con un 95% de confianza que no  hay diferencia significativa entre la puntuación general de Canon y Nikon.
+
 
 #Regresión lineal
 
