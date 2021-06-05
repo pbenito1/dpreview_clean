@@ -1,3 +1,4 @@
+  
 ---
 title: 'Tipología y ciclo de vida de los datos: PRA2'
 author: "Autor: Pablo Benito y Miquel Rived"
@@ -20,12 +21,11 @@ editor_options:
 ---
 
 ******
-# Cargar el archivo
+# Descripción del dataset. ¿Por qué es importante y qué pregunta/problema pretende responder?
 
 <span style="color: red;">**RÚBRICA** Apartados 1,2,3 y 4: 30%.</span>
 
 > Se debe abrir el archivo de datos y examinar el tipo de datos con los que R ha interpretado cada variable. Examinar también los valores resumen de cada tipo de variable.
-
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 # Cargamos los paquetes R que vamos a usar
 library(ggplot2)
@@ -38,7 +38,6 @@ library(RcmdrMisc)
 # library(ggbiplot)
 library(summarytools)
 library(kableExtra)
-
 ```
 
 En primer lugar cargamos el archivo utilizando la función `read.csv`. añadimos el parámetro `stringsAsFactors=False` para que no convierta en factores los atributos que detecte como `String`. Posteriormente, nosotros realizaremos esa conversión para aquellos campos que consideremos oportuno.
@@ -188,7 +187,6 @@ description_df <- data.frame (
                       "Número de puntos de enfoque", # IMPORTANTE
                       "Almacenamiento incluido") 
                   )
-
 kable(description_df,caption="**Propiedades de las cámaras**") %>% kable_styling()
 ```
 
@@ -204,9 +202,8 @@ Veamos que aspecto tienen los datos mostrando las primeras filas:
 head(data)
 ```
 
+# Integración y selección de los datos de interés a analizar
 
-
-# Reducción de la dimensionalidad
 Seleccionamos exclusivamente con las siguientes columnas, además, para facilitar el análisis posterior, las renombramos a los nombres indicados.
 
 ## Variables cuantitativas
@@ -321,7 +318,6 @@ data<- rename(data,
                tipo_sensor=Sensor.type,
                fecha_lanzamiento=announcement_date
               )
-
 ```
 
 Convertimos a factor los atributos:
@@ -330,17 +326,18 @@ data$marca<-as.factor(data$marca)
 data$tipo_cuerpo<-as.factor(data$tipo_cuerpo)
 data$tipo_sensor<-as.factor(data$tipo_sensor)
 data$caracteristicas.velocidad_obturador<-as.factor(data$caracteristicas.velocidad_obturador)
+data$GPS <- as.factor(data$GPS)
 ```
 
 Finalmente aplicamos la reducción de la dimensionalidad, filtrando únicamente las columnas que nos interesan
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
-data <- data[ , grepl( "puntuacion|caracteristicas|tipo_|fecha_lanzamiento|marca|modelo|precio" , names( data ) ) ]
+data <- data[ , grepl( "puntuacion|caracteristicas|tipo_|fecha_lanzamiento|marca|modelo|precio|GPS" , names( data ) ) ]
 ```
 
-# Extraccción de valores numéricos
+## Extraccción de valores numéricos
 
-## Atributo `precio`
+### Atributo `precio`
 Los valores de la columna `precio` tiene diversos tipos de valores. En la mayoría de las filas contiene un único precio en dólares, precedido del símbolo de dolar (p.ej. `$899`), pero en algunos casos incluye varios precios en función del kit a comprar (con objetivo, sin objetivo, con varios ojetivos,...) y en otros casos se muestra el precio tanto en dólares como en otras monedas (euro y libras).
 
 Para simplificar la extracción, nos quedaremos con el primer precio que aparezca precedido del símbolo del dólar utilizando una expresión regular. 
@@ -349,42 +346,37 @@ Otras posibles alternativas en el tratamiento de este atributo podría haber sid
 
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
-
 data$precio<-as.integer(str_extract(str_extract(data$precio, "(\\$\\d+)"),"(\\d+)"))
 ```
 
 
-## Atributo `puntuacion.pro_review`
+### Atributo `puntuacion.pro_review`
 
 Este atributo contiene un porcentaje que incluye el símbolo `%`. Interesa convertirlo a entero y eliminar ese porcentaje. Utilizaremos para ello una expresión regular y la función `str_extract` del paquete `stringr`
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
-
 data$puntuacion.pro_review<-as.integer(str_extract(data$puntuacion.pro_review, "(\\d+)"))
 ```
 
-## Atributo `caracteristicas.peso`
+### Atributo `caracteristicas.peso`
 
 Este atributo expresa el peso tanto en gramos como en libras y onzas. Utilizaremos una expresión regular para quedarnos con el peso en gramos
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
-
 data$caracteristicas.peso<-as.integer(str_extract(data$caracteristicas.peso, "(\\d+)"))
-
 ```
-# Ajuste de variables discretas
+## Ajuste de variables discretas
 
-## Tipo de sensor
+### Tipo de sensor
 
 La variable `tipo_sensor contiene diversos valores que se pueden agrupar en dos grandes grupos: CCD y CMOS. Realizamos esta simplificación:
-
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 # https://stackoverflow.com/questions/25372082/create-column-based-on-presence-of-string-pattern-and-ifelse
 data$tipo_sensor<-ifelse(grepl("CMOS",data$tipo_sensor),'CMOS','CCD')
 ```
 
 
-# Extracción de fecha
+## Extracción de fecha
 
 La fecha de lanzamiento de la cámara viene especificada en el atributo `fecha_lanzamiento`.
 
@@ -392,17 +384,19 @@ El formato del campo varía en función de si el lanzamiento ha sido hace menos 
 
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
-
 data$fecha_lanzamiento <- as.integer(str_extract(data$fecha_lanzamiento, "(\\d\\d\\d\\d)"))
 # Asignamos por defecto al año 2020
 data[is.na(data$fecha_lanzamiento),"fecha_lanzamiento"] = 2020
-
 data$fecha_lanzamiento <-as.factor(data$fecha_lanzamiento)
 ```
 
-# Comprobar atributos con valores vacíos
+# Limpieza de datos
+## ¿Los datos contienen ceros o elementos vacíos? ¿Como gestionarías cada uno de estos casos?
 
-Asignamos  `NA` a los atributos con valor cadena vacía
+### Comprobar atributos con valores vacíos
+
+El dataset incluye elementos vacío. El tratamiento que realizaremos es asignar  `NA` a los atributos con valor cadena vacía.
+
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 data <- data %>% mutate_all(list(~na_if(.,"")))
 ```
@@ -415,16 +409,14 @@ Eliminamos todos aquellos atributos tipo "puntuación" que tengan más del 90% d
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 #https://stackoverflow.com/questions/31848156/delete-columns-rows-with-more-than-x-missing
-# Esto no lo haría porque creo que nos estamos cargando el precio
 data.puntuacion <- data%>%select(starts_with("puntuacion"))
 atributes_to_remove<-colnames(data.puntuacion[, which(colMeans(is.na(data.puntuacion)) > 0.9)])
 data<-data %>% select(-atributes_to_remove)
 print("Atributos eliminados:")
 atributes_to_remove
-
 ```
 
-# Verificar duplicación de registros
+### Verificar duplicación de registros
 
 No existe un campo ID. Se puede verificar la existencia de duplicados mediante la combinación de campos Brand+Name.
 
@@ -438,9 +430,9 @@ if (nrow(unique(data[,c("marca","modelo")]))!=nrow(data[,c("marca","modelo")])){
 ```
 
 
-# Imputación de valores vacios
+### Imputación de valores vacios
 
-## Puntuaciones
+#### Puntuaciones
 
 Para todos los atributos de tipo ´puntuacion.xxxx´, imputamos inicialmente con la **media de la misma marca y tipo de cuerpo**:
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
@@ -465,6 +457,61 @@ data<-data %>%
        starts_with('puntuacion'))
 ```
 
+## Identificación y tratamiento de valores extremos
+
+Otro análisis que se debe hacer son los valores extremos. Nosotros lo realizaremos para los valores de precio, peso y la puntuación de proreview.
+
+
+### Precio
+
+Veamos los valores extremos del precio de las cámaras
+
+```{r message= FALSE, warning=FALSE}
+boxplot(data$precio)
+out = boxplot.stats(data$precio)$out
+out
+```
+
+Para el precio tenemos muchos valores extremos. Como podemos comprobar los datos con la misma página de dpreview.com para ver si se ha realizado bien la extracción, antes de tomar cualquier decisión podemos comprobar si los datos se han extraído bien de la página.
+
+Tras una breve comprobación, vemos como cámaras como LEICA M10-R vale 8295 dólares, LEICA M10 Monochrom vale también 8295 dólares, o Fujifilm GFX 100 Specs cuesta 9999 dólares.
+
+Por lo tanto, tras comprobar los valores extremos en la web, vemos que no son errores sino valores reales. Y decidimos quedárnoslos y trabajar con ellos.
+
+
+### Peso
+
+Veamos los valores extremos del peso de las cámaras
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+boxplot(data$caracteristicas.peso)
+out = boxplot.stats(data$caracteristicas.peso)$out
+out
+
+filter(data, caracteristicas.peso > 1700)$modelo
+```
+
+Este caso es similar al anterior, por lo que también comprobaremos un par de cámaras para ver si nos encontramos ante casos reales o errores.
+
+En la misma página web, podemos observar como Kodak DCS315 pesa 1.800 g y Kodak DCS760 pesa 1860 g.
+
+Por lo tanto, nos encontramos ante valores reales y trabajaremos con ellos.
+
+
+
+### Puntuacion.proreview
+
+Veamos los valores extremos de la puntuación proreview de las cámaras
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+boxplot(data$puntuacion.pro_review)
+out = boxplot.stats(data$puntuacion.pro_review)$out
+out
+```
+
+En este caso también nos encontramos varios valores extremos, pero todos se comprenden entre el 0 y el 100, por lo que los damos como buenos ya que son los valores entre los que puede estar la cámara.
 
 # Archivo limpio
 
@@ -473,7 +520,73 @@ Para guardar el `dataframe` resultado del procesamiento utilizamos la función `
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 write.csv(data, 'dpreview_clean.csv', row.names = FALSE)
 ```
-# Análisis exploratorio
+# Análisis de los datos
+
+## Selección de los grupos de datos que se quieren analizar/comparar (planificación de los análisis a aplicar).
+
+En primer lugar se seleccionan los datos que se quieren analizar/comparar. En este ejercicio, el objetivo es realizar los análisis exploratorios que se han determinado en el primer apartado.
+
+Para ello se realizará la comprobación de normalidad y homogeneidad de la varianza.
+
+Análisis estadístico para comparar los grupos de datos:
+- Análisis del precio en función del tipo de cuerpo
+- Análisis del tipo de sensor por fecha de lanzamiento
+- Análisis de la evolución del tipo de cuerpo.
+- Comparación de valoración de los usuarios entre cámaras Canon y Nicon
+- Creación de modelo para predecir la puntuación general de una cámara
+- Creación de modelo para predecir el precio de una cámara
+
+
+## Comprobación de la normalidad y la homogeneidad de la varianza
+
+La comprobación de la normalidad es necesaria para poder realizar análisis posteriores como por ejemplo el contraste de hipótesis.
+Para la comprobación de la normalidad nos basaremos en el teorema del límite central, según el cual una muestra mayor de 30 se podrá considerar que sigue una distribución normal.
+
+### Precio en función del tipo de cuerpo
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+cuerpos = na.omit(unique(data$tipo_cuerpo))
+for (cuerpo in cuerpos){
+  print(cuerpo)
+  print(length(filter(data, tipo_cuerpo == cuerpo)$precio))
+
+}
+```
+
+Como vemos, todas las muestras, a excepción de "VR/Action camera" todas las muestras de tipo de cuerpo siguen una distribución normal.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+plot(x = data$tipo_cuerpo)
+```
+
+## Puntuación general para Nikon y Canon
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+length( filter(data, marca=="Nikon")$puntuacion.general)
+length( filter(data, marca=="Canon")$puntuacion.general)
+
+```
+
+En este caso, ambas muestras presentan una distribución normal.
+
+Procedemos a comprobar la homogeneidad de la varianza para los dos grupos mediante el test de Barlett.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+bartlett.test(list(data$puntuacion.general[data$marca == "Nikon"],data$puntuacion.general[data$marca == "Canon"]))
+
+```
+
+Nos encontramos ante un p-value muy inferior a 0.05, por lo que podemos afirmar que ambas varianzas son similares.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+data_canon_nikon = filter(data, marca %in% c("Nikon","Canon"))
+ggplot(data=data_canon_nikon, aes(x=marca, y= puntuacion.general, colour = marca)) + geom_boxplot() + geom_point() 
+```
+
+
+## Aplicación de pruebas estadísticas para comparar los grupos de datos. En función de los datos y el objetivo del estudio, aplicar pruebas de contraste de hipótesis, correlaciones, regresiones, etc. Aplicar al menos tres métodos de análisis diferentes.
+
+### Análisis exploratorio
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 ggplot(data, aes(x=precio, y=tipo_cuerpo)) + 
@@ -485,7 +598,6 @@ Lógicamente las cámaras más caras son las SLR "grandes", que son las que se e
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 ggplot(data, aes(x=fecha_lanzamiento, fill=tipo_sensor)) +
     geom_bar()+theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-
 ```
 
 Se puede observar que el boom de las cámaras digitales tuvo lugar entre el año 2000 y el año 2015. Posiblemente el declive se debió a mejora de las cámaras de los dispositivos móviles. Asimismo se puede observar, a través del código de colores, la evolución en el tipo de sensores que equipan las cámaras, pasando de sensores CCD en las fases iniciales a sensores CMOS, que han copado el mercado desde el 2013.
@@ -496,27 +608,13 @@ Veamos la evolución a continuación en función del tipo de cámara:
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 ggplot(data, aes(x=fecha_lanzamiento, fill=tipo_cuerpo)) +
     geom_bar()+theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-
 ```
 
 Como habíamos indicado anteriormente, la aparición de dispositivos móviles con cámaras de calidad ha hecho desaparecer prácticamente por completo el segmento de las cámaras compactas y ultracompactas, manteniendose únicamente actualizadas el sector de las cámaras profesionales.
 
-# Valores extremos
 
-## Precio
-Veamos los valores extremos del precio de las cámaras
-```{r message= FALSE, warning=FALSE}
-boxplot(data$precio)
-out = boxplot.stats(data$precio)$out
-out
-```
+### Pruebas de hipótesis
 
-
-
-
-# Pruebas Estadísticas para comparación de los datos
-
-# Pruebas de hipótesis
 
 Siempre ha habido un gran debate entre los profesionales de la fotografía acerca de qué marca es mejor, si Canon o Nikon.
 Vamos a verificar mediante un contraste de hipótesis sobre la variable `puntuacion.general` si existe una diferencia significativa entre ambas marcas.
@@ -531,7 +629,6 @@ Suponemos normalidad en las muestras  por el Teorema del Límite Central dado qu
 
 Comprobamos la homogeneidad de varianzas
 ```{r message= FALSE, warning=FALSE}
-
 var.test( data %>%filter(marca=="Nikon")%>%pull(puntuacion.general), data %>%filter(marca=="Canon")%>%pull(puntuacion.general) )
 ```
 El p-value da un valor por debajo de 0.05, por lo que podemos suponer que las muestras tienen la misma varianza con un 95% de confianza.
@@ -548,14 +645,119 @@ t.test( data %>%filter(marca=="Nikon")%>%pull(puntuacion.general),
 En este caso el resultado del t-test ofrece un `p-value` de 4.251e-08, inferior a 0.05, con lo que rechazamos la hipótesis nula y confirmamos con un 95% de confianza que no  hay diferencia significativa entre la puntuación general de Canon y Nikon.
 
 
-# Regresión lineal
+### Regresión lineal
+
+### Puntuacion
+
+A continuación realizaremos una regresión lineal para ver si podemos predecir la puntuación de la cámara en función de diferentes valores.
+
+Los valores que se analizarán son el precio, el peso, la puntuación en ergonomía, la puntuación de las características y la puntuación de la precisión de la cámara.
 
 ```{r message= FALSE, warning=FALSE}
-#lineal_regression = lm(precio ~ XXXX, data = data)
-#summary(lineal_regression)
-
+lineal_regression = lm(puntuacion.general ~ precio + caracteristicas.peso + puntuacion.ergonomia_manejo + puntuacion.caracteristicas + puntuacion.precision, data = data)
+summary(lineal_regression)
 ```
 
+Podemos ver como el precio o el peso prácticamente no tienen relación con la puntuación general que recibe una cámara.
+
+La puntuación en la ergonomia o las características si que afectan de forma positiva en la puntuación general que recibirá la cámara. En cambio, la puntuación en la precisión de la cámara afecta de forma negativa en la puntuación final que esta tendrá.
+
+Aún y así, la R-squared de la regresión lineal hecha es de 0.25 por lo que las previsiones que se pueden hacer con este modelo no se ajustarán mucho a la realidad.
+
+#### Precio
+
+A continuación, veremos si podemos crear un modelo que se ajuste más a la realidad que el anterior, para predecir el precio de una cámara.
+
+Los valores que se analizarán son la puntuación general, si tiene GPS o no, la puntuación en ergonomía, la puntuación de las características , la puntuación del visor y el tipo de cuerpo de la cámara
+
+
+
+
+```{r message= FALSE, warning=FALSE}
+lineal_regression = lm(precio ~ puntuacion.general + GPS + puntuacion.ergonomia_manejo + puntuacion.caracteristicas  + puntuacion.visor + tipo_cuerpo, data = data)
+summary(lineal_regression)
+```
+
+En este caso vemos como la mayoría de factores tienen una gran repercusión en el precio final. 
+
+Por ejemplo, el hecho de no tener GPS disminuye en 130 dólares el precio final.
+
+También podemos ver como el tipo de cuerpo "Large SLR" aumenta el precio final en 5.320 dólares.
+
+Además, un hecho sorprendete es que la puntuación general es inversamente proporcional al precio que tendrá la cámara.
+
+En este caso, la R-squared nos da un valor de 0.5272, que aunque no es el valor deseado, si que es un valor con el que se puede trabajar y hacer predicciones.
+
+### Correlación
+
+En este apartado buscaremos si existe correlación entre las variables numéricas que hemos usado con anterioridad, que son: puntuacion.general, precio, puntuacion.ergonomia_manejo, puntuacion.caracteristicas y  
+puntuacion.visor.
+
+
+```{r message= FALSE, warning=FALSE}
+data_correlation = select(data, x=c(puntuacion.general, precio, puntuacion.ergonomia_manejo, puntuacion.caracteristicas, puntuacion.visor))
+colnames(data_correlation) = c("puntuacion.general", "precio", "puntuacion.ergonomia_manejo", "puntuacion.caracteristicas", "puntuacion.visor")
+plot(data_correlation)
+```
+
+En los gráficos anteriores podemos ver las diferentes características numéricas  pintadas una frente a otra. Aunque no se aprecia ningún caso de relación lineal, haremos el análisis de correlaciones en profundidad.
+
+```{r message= FALSE, warning=FALSE}
+cor.test(data$puntuacion.general, data$precio, method = "spearman")
+```
+
+```{r message= FALSE, warning=FALSE}
+cor.test(data$puntuacion.general, data$puntuacion.ergonomia_manejo, method = "spearman")
+```
+
+```{r message= FALSE, warning=FALSE}
+cor.test(data$puntuacion.general, data$puntuacion.caracteristicas, method = "spearman")
+```
+
+```{r message= FALSE, warning=FALSE}
+cor.test(data$puntuacion.general, data$puntuacion.visor, method = "spearman")
+```
+
+```{r message= FALSE, warning=FALSE}
+cor.test(data$precio, data$puntuacion.ergonomia_manejo, method = "spearman")
+```
+
+```{r message= FALSE, warning=FALSE}
+cor.test(data$precio, data$puntuacion.caracteristicas, method = "spearman")
+```
+
+```{r message= FALSE, warning=FALSE}
+cor.test(data$precio, data$puntuacion.visor, method = "spearman")
+```
+
+```{r message= FALSE, warning=FALSE}
+cor.test(data$puntuacion.ergonomia_manejo, data$puntuacion.caracteristicas, method = "spearman")
+```
+
+```{r message= FALSE, warning=FALSE}
+cor.test(data$puntuacion.ergonomia_manejo, data$puntuacion.visor, method = "spearman")
+```
+
+```{r message= FALSE, warning=FALSE}
+cor.test(data$puntuacion.caracteristicas, data$puntuacion.visor, method = "spearman")
+```
+
+
+El test de correlación devuelve un resultado entre [-1,1] donde los extremos indican una alta correlación y el 0 una correlación nula.
+
+En este cruce entre las variables anteriores, la mayoría de ellas muestran valores muy próximos al 0, por lo que en la mayoría de ellas no existe correlación.
+
+Aún y así podemos encontrar una correlación positiva entre la puntuación de las características y la puntuación del visor, entre el precio y la punutuación de ergonomía y manejo, y entre el precio y la puntuación de las características.
+
+# Representación de los resultados a partir de tablas y gráficas.
+
+Todos los resultados obtenidos se han ido presentando en cada uno de los apartados en tablas y gráficas.
+
+# Resolución del problema. A partir de los resultados obtenidos, ¿Cuáles son las conclusiones? ¿Los resultados permiten responder al problema?
+
+# Código: Hay que adjuntar el código, preferiblemente en R, con el que se han realizado la limpieza, análisis y representación de los datos. Si lo preferís, también podéis trabajar en Python.
+
+Todo el código utilizado para completar la práctica está incluido en este documento.
 
 # Referencias
 
