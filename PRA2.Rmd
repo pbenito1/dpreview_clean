@@ -21,11 +21,7 @@ editor_options:
 ---
 
 ******
-# Descripción del dataset. ¿Por qué es importante y qué pregunta/problema pretende responder?
 
-<span style="color: red;">**RÚBRICA** Apartados 1,2,3 y 4: 30%.</span>
-
-> Se debe abrir el archivo de datos y examinar el tipo de datos con los que R ha interpretado cada variable. Examinar también los valores resumen de cada tipo de variable.
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 # Cargamos los paquetes R que vamos a usar
 library(ggplot2)
@@ -39,6 +35,37 @@ library(RcmdrMisc)
 library(summarytools)
 library(kableExtra)
 ```
+
+# Descripción del dataset. ¿Por qué es importante y qué pregunta/problema pretende responder?
+
+El dataset empleado en esta práctica es el obtenido en la PRA1 y es el resultado de un proceso de *scraping* de la web de *reviews* de cámaras digitales dpreview.com. Contiene 2490 registros con 125 columnas de tipo numérico y categórico, representando cada fila una cámara digital. 
+
+
+
+# Importancia y objetivos de los análisis
+
+Lo más interesante del conjunto de datos extraído es la gran cantidad de especificaciones diferentes que se encuentran, así como el gran abanico de cámaras digitales que lo abarcan.
+
+En primer lugar se quiere analizar que características técnicas afectan más en el aumento de precio de una cámara digital.
+
+Por otro lado, se tratará de determinar qué cámaras son las más valoradas por los usuarios o los expertos, por lo que se pretenderá analizar las marcas más valoradas, si el precio influye en la valoración final, o que tipo de especificaciones son las que buscan los usuarios en una cámara digital para realizar una valoración alta.
+
+Los datos permiten responder a preguntas del tipo:
+
+- ¿Cuál es la cámara mejor valorada por los usuarios?
+- ¿Cuál es la cámara más cara y más ergónomica?
+- ¿Qué cámara es capaz de disparar más fotografías en modo ráfaga?
+- ¿Cuál es la cámara con GPS más ligera y mayor autonomía de batería?
+
+Estas preguntas pueden variar a lo largo de las prácticas, ya que disponemos de una gran variedad de cámaras y campos para analizarlas que seguro que al visualizar con mayor detenimiento nos hacen hacernos nuevas preguntas.
+
+La diferencia principal con los otros estudios encontrados de dpreview.com es la gran variedad de campos que hemos seleccionado para analizar las cámaras.
+
+# Limpieza
+
+
+> Se debe abrir el archivo de datos y examinar el tipo de datos con los que R ha interpretado cada variable. Examinar también los valores resumen de cada tipo de variable.
+
 
 En primer lugar cargamos el archivo utilizando la función `read.csv`. añadimos el parámetro `stringsAsFactors=False` para que no convierta en factores los atributos que detecte como `String`. Posteriormente, nosotros realizaremos esa conversión para aquellos campos que consideremos oportuno.
 
@@ -365,11 +392,30 @@ Este atributo expresa el peso tanto en gramos como en libras y onzas. Utilizarem
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 data$caracteristicas.peso<-as.integer(str_extract(data$caracteristicas.peso, "(\\d+)"))
 ```
+
+### Atributo `caracteristicas.dimensiones`
+
+Este atributo expresa el tamaño (ancho x alto x fondo) en milímetros. A partir del mismo es posible establecer una nueva variable volumen
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+data$dim.ancho<-as.integer(str_match(data$caracteristicas.dimensiones, "(\\d+) x (\\d+) x (\\d+)")[,2])
+data$dim.alto<-as.integer(str_match(data$caracteristicas.dimensiones, "(\\d+) x (\\d+) x (\\d+)")[,3])
+data$dim.fondo<-as.integer(str_match(data$caracteristicas.dimensiones, "(\\d+) x (\\d+) x (\\d+)")[,4])
+
+# Calculamos el volumen
+data$caracteristicas.volumen <- data$dim.ancho  * data$dim.alto * data$dim.fondo
+
+# data %>% select(caracteristicas.dimensiones,dim.ancho,dim.alto,dim.fondo, caracteristicas.volumen)
+
+# Eliminamos las columnas innecesarias
+data <- data %>% select (-c(caracteristicas.dimensiones,dim.ancho, dim.alto,dim.fondo))
+```
 ## Ajuste de variables discretas
 
 ### Tipo de sensor
 
-La variable `tipo_sensor contiene diversos valores que se pueden agrupar en dos grandes grupos: CCD y CMOS. Realizamos esta simplificación:
+La variable `tipo_sensor` contiene diversos valores que se pueden agrupar en dos grandes grupos: CCD y CMOS. Realizamos esta simplificación:
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 # https://stackoverflow.com/questions/25372082/create-column-based-on-presence-of-string-pattern-and-ifelse
 data$tipo_sensor<-ifelse(grepl("CMOS",data$tipo_sensor),'CMOS','CCD')
@@ -395,15 +441,19 @@ data$fecha_lanzamiento <-as.factor(data$fecha_lanzamiento)
 
 ### Comprobar atributos con valores vacíos
 
-El dataset incluye elementos vacío. El tratamiento que realizaremos es asignar  `NA` a los atributos con valor cadena vacía.
+Vamos a verificar si el dataset incluye elementos vacíos:
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+sapply(data, function(x) sum(is.na(x)))
+```
+
+
+Se comprueba que efectivamente el `dataset` contiene un gran número de elementos vacíos, especialmente en las columnas de puntuación.
+El primer tratamiento que realizaremos es asignar `NA` a los atributos con valor cadena vacía.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 data <- data %>% mutate_all(list(~na_if(.,"")))
 ```
-```{r echo=TRUE, message=FALSE, warning=FALSE}
-#na_count <-data.frame(sapply(data, function(y) sum(length(which(is.na(y))))))
-#na_count
-```
+
 
 Eliminamos todos aquellos atributos tipo "puntuación" que tengan más del 90% de atributos con valor `NA`
 
@@ -415,6 +465,13 @@ data<-data %>% select(-atributes_to_remove)
 print("Atributos eliminados:")
 atributes_to_remove
 ```
+
+Además, dado que nuestra variable objetivo es el precio, eliminamos todas aquellas filas para las que el precio no se encuentra definido. Esto supondrá una reducción significativa en el `dataset`.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+data %>% filter (!is.na(precio))
+```
+
 
 ### Verificar duplicación de registros
 
@@ -459,7 +516,7 @@ data<-data %>%
 
 ## Identificación y tratamiento de valores extremos
 
-Otro análisis que se debe hacer son los valores extremos. Nosotros lo realizaremos para los valores de precio, peso y la puntuación de proreview.
+Identificamos a continuación los valores extremos. Nosotros lo realizaremos para los valores de precio, peso y la puntuación de proreview.
 
 
 ### Precio
@@ -553,7 +610,7 @@ for (cuerpo in cuerpos){
 }
 ```
 
-Como vemos, todas las muestras, a excepción de "VR/Action camera" todas las muestras de tipo de cuerpo siguen una distribución normal.
+Como vemos, todas las muestras, a excepción de "VR/Action camera" cuentan con más de 30 elementos, por lo que se puede aplicar el Teorema del Límite Central  y podemos considerar que la media de cada muestra sigue una distribución normal.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 plot(x = data$tipo_cuerpo)
@@ -567,7 +624,7 @@ length( filter(data, marca=="Canon")$puntuacion.general)
 
 ```
 
-En este caso, ambas muestras presentan una distribución normal.
+En este caso, ambos conjuntos superan las 30 muestras y podemos asumir normalidad por el TLC.
 
 Procedemos a comprobar la homogeneidad de la varianza para los dos grupos mediante el test de Barlett.
 
@@ -600,7 +657,7 @@ ggplot(data, aes(x=fecha_lanzamiento, fill=tipo_sensor)) +
     geom_bar()+theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 ```
 
-Se puede observar que el boom de las cámaras digitales tuvo lugar entre el año 2000 y el año 2015. Posiblemente el declive se debió a mejora de las cámaras de los dispositivos móviles. Asimismo se puede observar, a través del código de colores, la evolución en el tipo de sensores que equipan las cámaras, pasando de sensores CCD en las fases iniciales a sensores CMOS, que han copado el mercado desde el 2013.
+Se puede observar que el *boom* de las cámaras digitales tuvo lugar entre el año 2000 y el año 2015. Posiblemente el declive se debió a mejora de las cámaras de los dispositivos móviles. Asimismo se puede observar, a través del código de colores, la evolución en el tipo de sensores que equipan las cámaras, pasando de sensores CCD en las fases iniciales a sensores CMOS, que han copado el mercado desde el 2013.
 
 
 Veamos la evolución a continuación en función del tipo de cámara:
@@ -614,7 +671,6 @@ Como habíamos indicado anteriormente, la aparición de dispositivos móviles co
 
 
 ### Pruebas de hipótesis
-
 
 Siempre ha habido un gran debate entre los profesionales de la fotografía acerca de qué marca es mejor, si Canon o Nikon.
 Vamos a verificar mediante un contraste de hipótesis sobre la variable `puntuacion.general` si existe una diferencia significativa entre ambas marcas.
@@ -642,16 +698,17 @@ t.test( data %>%filter(marca=="Nikon")%>%pull(puntuacion.general),
         var.equal = TRUE ) # se supone homocedasticidad
 ```
 
-En este caso el resultado del t-test ofrece un `p-value` de 4.251e-08, inferior a 0.05, con lo que rechazamos la hipótesis nula y confirmamos con un 95% de confianza que no  hay diferencia significativa entre la puntuación general de Canon y Nikon.
+En este caso el resultado del t-test ofrece un `p-value` de 4.251e-08, inferior a 0.05, con lo que rechazamos la hipótesis nula y confirmamos con un 95% de confianza que nohay diferencia significativa entre la puntuación general de Canon y Nikon.
 
 
 ### Regresión lineal
 
 ### Puntuacion
 
-A continuación realizaremos una regresión lineal para ver si podemos predecir la puntuación de la cámara en función de diferentes valores.
+A continuación construiremos un modelo de regresión lineal para tratar de predecir la puntuación de la cámara en función de diferentes valores.
 
 Los valores que se analizarán son el precio, el peso, la puntuación en ergonomía, la puntuación de las características y la puntuación de la precisión de la cámara.
+
 
 ```{r message= FALSE, warning=FALSE}
 lineal_regression = lm(puntuacion.general ~ precio + caracteristicas.peso + puntuacion.ergonomia_manejo + puntuacion.caracteristicas + puntuacion.precision, data = data)
@@ -669,8 +726,6 @@ Aún y así, la R-squared de la regresión lineal hecha es de 0.25 por lo que la
 A continuación, veremos si podemos crear un modelo que se ajuste más a la realidad que el anterior, para predecir el precio de una cámara.
 
 Los valores que se analizarán son la puntuación general, si tiene GPS o no, la puntuación en ergonomía, la puntuación de las características , la puntuación del visor y el tipo de cuerpo de la cámara
-
-
 
 
 ```{r message= FALSE, warning=FALSE}
@@ -755,7 +810,7 @@ Todos los resultados obtenidos se han ido presentando en cada uno de los apartad
 
 # Resolución del problema. A partir de los resultados obtenidos, ¿Cuáles son las conclusiones? ¿Los resultados permiten responder al problema?
 
-# Código: Hay que adjuntar el código, preferiblemente en R, con el que se han realizado la limpieza, análisis y representación de los datos. Si lo preferís, también podéis trabajar en Python.
+> Código: Hay que adjuntar el código, preferiblemente en R, con el que se han realizado la limpieza, análisis y representación de los datos. Si lo preferís, también podéis trabajar en Python.
 
 Todo el código utilizado para completar la práctica está incluido en este documento.
 
