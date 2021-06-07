@@ -593,6 +593,18 @@ Análisis estadístico para comparar los grupos de datos:
 - Creación de modelo para predecir la puntuación general de una cámara
 - Creación de modelo para predecir el precio de una cámara
 
+## Correlación entre variables 
+
+En primer lugar vamos a realizar un análisis visual de la correlación entre las variables numéricas.
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# Fuente: http://www.sthda.com/english/wiki/correlation-matrix-an-r-function-to-do-all-you-need
+#install.packages("corrplot")
+library(corrplot)
+source("http://www.sthda.com/upload/rquery_cormat.r")
+nums <- unlist(lapply(data, is.numeric)) 
+rquery.cormat(data[ , nums])
+#corrplot(cor(data[, nums]), type="upper")
+```
 
 ## Comprobación de la normalidad y la homogeneidad de la varianza
 
