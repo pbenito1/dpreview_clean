@@ -231,7 +231,7 @@ head(data)
 
 # Integración y selección de los datos de interés a analizar
 
-Seleccionamos exclusivamente con las siguientes columnas, además, para facilitar el análisis posterior, las renombramos a los nombres indicados.
+Seleccionamos exclusivamente las siguientes columnas. Además, para facilitar el análisis posterior, las renombramos a los nombres indicados.
 
 ## Variables cuantitativas
 
@@ -826,8 +826,15 @@ Todos los resultados obtenidos se han ido presentando en cada uno de los apartad
 
 Todo el código utilizado para completar la práctica está incluido en este documento.
 
+# Conclusiones
+
+Creemos que el dataset con el que se ha trabajado en esta práctica resulta ideal para los objetivos de la misma. Es un *dataset* que requiere mucho tratamiento de limpieza, extracción de valores y conversión de tipos. El hecho de que no sea un *dataset* académico clásico imposibilita encontrar referencias de trabajos previos de limpieza.
+
+Los datos, una vez tratados, nos han servido para elaborar modelos, que aunque con baja precisión, se podrían emplear para realizar predicciones.
+
 # Referencias
 
+* Introducción a la limpieza y análisis de datos.  Calvo, M., Pérez, D., Subirats, L. (2019).  Editorial UOC.
 * Identificar y eliminar duplicados: [https://www.datanovia.com/en/lessons/identify-and-remove-duplicate-data-in-r/]
 * Tabla con medidas de tendencia central y dispersión: [https://cran.r-project.org/web/packages/qwraps2/vignettes/summary-statistics.html]
 * My favourite R package for: summarising data [https://dabblingwithdata.wordpress.com/2018/01/02/my-favourite-r-package-for-summarising-data/]

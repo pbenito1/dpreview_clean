@@ -1,55 +1,28 @@
-# dpreview.com scraping
-Limpieza de los datos proporcionados por el scraper de cámaras digitales de dpreview.com
+# dpreview.com 
 
-Práctica 2de la asignatura *"Tipología y ciclo de vida de los datos"* del [Máster en Ciencia de Datos de la UOC](https://estudios.uoc.edu/es/masters-universitarios/data-science/presentacion)
+Práctica 2 de la asignatura *"Tipología y ciclo de vida de los datos"* del [Máster en Ciencia de Datos de la UOC](https://estudios.uoc.edu/es/masters-universitarios/data-science/presentacion)
+
+Este respositorio se corresponde al entregable de la práctica 2 de la asignatura de la UOC Tipología y Ciclo de Vida de los Datos.
+
+El entregable consiste en un análisis del *dataset* sobre los datos proporcionador por el scraper de cámaras digitales de dpreview.com que se realizó en la práctica anterior.
+Limpieza de los datos proporcionados por el scraper de cámaras digitales de dpreview.com.
+
+Se ha querido proseguir con el proyecto para realizar todo el ciclo de vida de un proyecto de análisis de datos, desde su captación hasta su análisis. Debido a esto, veremos que se ha realizado una extensa limpieza, para después realizar un breve análisis exploratorio junto a la aplicación de diversas pruebas estadísticas.
 
 # Autores
 
 * Pablo Benito
 * Miquel Rived 
 
-# Descripción del dataset. 
+# Ficheros del proyecto
 
-> ¿Por qué es importante y qué pregunta/problema pretende responder?
+En este repositorio se encuentran los siguientes ficheros:
 
-# Integración y selección de los datos de interés a analizar.
-TBD
-# Limpieza de los datos
-## Elementos vacíos
-> ¿Los datos contienen ceros o elementos vacíos? ¿Cómo gestionarías cada uno de estos casos?
-TBD
-## Identificación y tratamiento de valores extremos
-TBD
-# Análisis de los datos
-## Selección de los grupos de datos que se quieren analizar/comparar (planificación de los análisis a aplicar)
-TBD
-## Comprobación de la normalidad y homogeneidad de la varianza
-TBD 
+* PRA2.rmd : El código fuente del *notebook* se puede consultar [aquí](https://github.com/pbenito1/dpreview_clean/blob/main/PRA2.Rmd). 
+* PRA2.html: El resultado de la ejecución del *notebook* se puede consultar [aquí](https://github.com/pbenito1/dpreview_clean/blob/main/PRA2.html). En este archivo se pueden ver las respuestas a las preguntas dadas en el enunciado de la práctica
+* dpreview.csv: El archivo csv a partir del cual se ha realizado la limpieza se puede consultar [aquí](https://github.com/pbenito1/dpreview_clean/blob/main/dpreview.csv)
+* dpreview_clean.csv: El archivo csv limpio se puede consultar [aquí](https://github.com/pbenito1/dpreview_clean/blob/main/dpreview_clean.csv)
 
-## Aplicación de pruebas estadísticas para comparar los grupos de datos
-En función de los datos y el objetivo del estudio, aplicar pruebas de contraste de hipótesis, correlaciones, regresiones, etc. Aplicar al menos tres métodos de análisis diferentes.
-
-TBD
-# Representación de los resultados a partir de tablas y gráficas
-TBD
-
-# Resolución del problema.
-> A partir de los resultados obtenidos, ¿cuáles son las conclusiones? ¿Los resultados permiten responder al problema?
-
-TBD
-
-# Contexto
-Esta práctica se ha realizado bajo el contexto de la asignatura Tipología y ciclo de vida de los datos, perteneciente al Máster en Ciencia de Datos de la Universitat Oberta de Catalunya. En ella, se aplican técnicas de limpieza y análisis de datos mediante el lenguaje de programación R
-
-
-# Código
-
-El *notebook* de limpieza de datos se  se ha desarrollado en R. 
-
-
-El código fuente del *notebook* se puede consultar [aquí](PRA2.Rmd).
-
-El resultado de la ejecución del *notebook* se puede consultar [aquí](https://htmlpreview.github.io/?https://github.com/pbenito1/dpreview_clean/blob/main/PRA2.html).
 
 # Contribuciones al proyecto
 
