@@ -19,7 +19,7 @@ Se ha querido proseguir con el proyecto para realizar todo el ciclo de vida de u
 En este repositorio se encuentran los siguientes ficheros:
 
 * PRA2.rmd : El código fuente del *notebook* se puede consultar [aquí](https://github.com/pbenito1/dpreview_clean/blob/main/PRA2.Rmd). 
-* PRA2.html: El resultado de la ejecución del *notebook* se puede consultar [[aquí](https://htmlpreview.github.io/?https://github.com/pbenito1/dpreview_clean/blob/main/PRA2.html). En este archivo se pueden ver las respuestas a las preguntas dadas en el enunciado de la práctica
+* PRA2.html: El resultado de la ejecución del *notebook* se puede consultar [aquí](https://htmlpreview.github.io/?https://github.com/pbenito1/dpreview_clean/blob/main/PRA2.html). En este archivo se pueden ver las respuestas a las preguntas dadas en el enunciado de la práctica
 * dpreview.csv: El archivo csv a partir del cual se ha realizado la limpieza se puede consultar [aquí](https://github.com/pbenito1/dpreview_clean/blob/main/dpreview.csv)
 * dpreview_clean.csv: El archivo csv limpio se puede consultar [aquí](https://github.com/pbenito1/dpreview_clean/blob/main/dpreview_clean.csv)
 
